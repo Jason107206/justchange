@@ -58,7 +58,7 @@ const UI_COPY = {
     noRoutesLoaded: '未載入路線',
     busId: '車輛編號',
     arrivingAt: '到達',
-    departingFrom: '從...開出',
+    departingFrom: '開出',
     arrivingIn: '將於',
     durationUnits: {
       hour: '小時',
@@ -95,12 +95,14 @@ type BusPoint = {
   busId: string;
   arrivalTimeInSecond: number;
   departureTimeInSecond: number;
+  isScheduled: string;
 };
 
 type UpcomingStop = {
   name: string;
   arrivalSeconds: number;
   departureSeconds: number;
+  isScheduled: string;
 };
 
 type BusStopRecord = {
@@ -243,7 +245,6 @@ function getUpcomingStops(
   direction: 'outbound' | 'inbound',
   busStops: BusStopRecord[],
   language: 'en' | 'zh',
-
 ): UpcomingStop[] {
   const routeStops = routeStopRecords.filter((routeStop) => routeStop.referenceId === routeId);
   const directionStops = routeStops.filter((routeStop) => (direction === 'outbound' ? routeStop.direction === 'O' : routeStop.direction === 'I'));
@@ -271,9 +272,10 @@ function getUpcomingStops(
       name: language === 'en' ? routeStop.stationNameEng : routeStop.stationNameChi,
       arrivalSeconds: Number(busEntry.arrivalTimeInSecond),
       departureSeconds: Number(busEntry.departureTimeInSecond),
+      isScheduled: busEntry.isScheduled
     });
 
-    if (upcomingStops.length === 3) {
+    if (upcomingStops.length === 5) {
       break;
     }
   }
@@ -299,12 +301,14 @@ function formatSecondsLabel(seconds: number, language: 'en' | 'zh') {
 function formatStopLine(stop: UpcomingStop, language: 'en' | 'zh') {
   const copy = UI_COPY[language];
 
-  if (stop.departureSeconds === 0) {
-    return language === 'en' ? `${copy.departingFrom} ${stop.name}` : `正在${stop.name} ${copy.departingFrom}`;
-  }
+  if (stop.isScheduled === "1") return;
 
   if (stop.arrivalSeconds === 0) {
     return language === 'en' ? `${copy.arrivingAt} ${stop.name}` : `已${copy.arrivingAt} ${stop.name}`;
+  }
+
+  if (stop.departureSeconds === 0) {
+    return language === 'en' ? `${copy.departingFrom} ${stop.name}` : `正在從 ${stop.name} ${copy.departingFrom}`;
   }
 
   return language === 'en'
@@ -369,6 +373,7 @@ function BusRouteMap() {
     busLocation: { latitude: number; longitude: number };
     busId: string;
     arrivalTimeInSecond: number;
+    isScheduled: string
   }>>([]);
   const [routeMarkers, setRouteMarkers] = useState<Array<{
     stationId: string;
@@ -422,7 +427,7 @@ function BusRouteMap() {
 
         const selectedStop = directionStops[directionStops.length - 1];
 
-        setMapData((selectedStop?.bus ?? []).filter((bus) => bus.busLocation.latitude !== 0 || bus.busLocation.longitude !== 0));
+        setMapData((selectedStop?.bus ?? []).filter((bus) => bus.busLocation.latitude !== 0 && bus.busLocation.longitude !== 0));
         setError(null);
       })
       .catch((err: Error) => {
