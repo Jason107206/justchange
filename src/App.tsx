@@ -4,7 +4,7 @@ import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-le
 import busStopsCsv from '../data/mtr_bus_stops.csv?raw';
 
 const ETA_DATA_URL = "https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule";
-const ROUTE_DATA_URL = '/data/mtr_bus_routes.csv';
+const ROUTE_DATA_URL = '/api/mtr_bus_routes.csv';
 const DEFAULT_ROUTE_ID = 'K73';
 const DEFAULT_LANGUAGE: 'en' | 'zh' = 'zh';
 const DEFAULT_DIRECTION: 'outbound' | 'inbound' = 'outbound';
@@ -17,7 +17,7 @@ const UI_COPY = {
     refetchData: 'Refetch data',
     refreshing: 'Refreshing...',
     loadingData: 'Loading data from server...',
-    emptyData: 'Data is empty...',
+    emptyDepartureData: 'There are no departures...',
     loadingRouteCsv: 'Loading route CSV...',
     routeCsvError: 'Error fetching route CSV:',
     dataError: 'Error fetching data:',
@@ -42,7 +42,7 @@ const UI_COPY = {
     refetchData: '重新載入資料',
     refreshing: '更新中...',
     loadingData: '正在從伺服器載入資料...',
-    emptyData: '暫無資料...',
+    emptyDepartureData: '現時沒有班次...',
     loadingRouteCsv: '正在載入路線資料...',
     routeCsvError: '路線 CSV 載入失敗：',
     dataError: '資料載入失敗：',
@@ -529,7 +529,7 @@ function BusRouteMap() {
       </div>
       {loading && <div className="map-status-panel">{UI_COPY[selectedLanguage].loadingData}</div>}
       {error && <div className="map-status-panel map-status-panel--error">{UI_COPY[selectedLanguage].dataError} {error}</div>}
-      {!loading && !error && mapData.length === 0 && <div className="map-status-panel">{UI_COPY[selectedLanguage].emptyData}</div>}
+      {!loading && !error && mapData.length === 0 && <div className="map-status-panel">{UI_COPY[selectedLanguage].emptyDepartureData}</div>}
       <div className="route-status-panel">
         <div className="route-status-panel__description">{selectedRouteDescription}</div>
         <label className="route-status-panel__label" htmlFor="direction-select">
