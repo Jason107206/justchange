@@ -4,7 +4,7 @@ import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-le
 import busStopsCsv from '../data/mtr_bus_stops.csv?raw';
 
 const ETA_DATA_URL = "https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule";
-const ROUTE_DATA_URL = '/api/mtr_bus_routes.csv';
+const ROUTE_DATA_URL = '/data/mtr_bus_routes.csv';
 const DEFAULT_ROUTE_ID = 'K73';
 const DEFAULT_LANGUAGE: 'en' | 'zh' = 'zh';
 const DEFAULT_DIRECTION: 'outbound' | 'inbound' = 'outbound';
