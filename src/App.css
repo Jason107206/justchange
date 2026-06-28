@@ -82,7 +82,7 @@
 .route-status-panel__segment {
     display: inline-flex;
     gap: 0.35rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.25rem;
     padding: 0.25rem;
     border-radius: 9999px;
     background: rgba(30, 41, 59, 0.9);
