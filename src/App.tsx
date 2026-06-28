@@ -1,6 +1,8 @@
 import './App.css';
 import { useCallback, useEffect, useState } from 'react';
-import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-leaflet';
+import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet';
+import markerIconPng from "leaflet/dist/images/marker-icon.png";
+import { Icon } from 'leaflet';
 import busStopsCsv from '../data/mtr_bus_stops.csv?raw';
 import routeDataCsv from '../data/mtr_bus_routes.csv?raw';
 
@@ -353,11 +355,11 @@ function RouteStopMarker({
   name: string;
 }) {
   return (
-    <CircleMarker center={[lat, long]} pathOptions={{ color: '#2563eb', fillColor: '#2563eb', fillOpacity: 0.9, weight: 2 }} radius={6}>
+    <Marker position={[lat, long]} icon={new Icon({ iconUrl: markerIconPng, iconSize: [25, 41], iconAnchor: [12, 41] })} >
       <Tooltip direction="top" offset={[0, -6]} opacity={1} permanent={false} sticky>
         <div>{seqNo}. {name}</div>
       </Tooltip>
-    </CircleMarker>
+    </Marker>
   );
 }
 
@@ -383,6 +385,8 @@ function BusRouteMap() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busStops, setBusStops] = useState<BusStopRecord[]>([]);
+
+  const [isOneWayRoute, setIsOneWayRoute] = useState(false);
 
   const fetchBusData = useCallback(async (routeName: string, direction: 'outbound' | 'inbound', language: 'en' | 'zh') => {
     const url = ETA_DATA_URL;
@@ -441,6 +445,11 @@ function BusRouteMap() {
   }, [selectedRouteId]);
 
   useEffect(() => {
+    const isSelectedRouteOneWay = routeStopRecords
+      .filter((routeStop) => routeStop.referenceId === selectedRouteReferenceId && routeStop.direction === 'I')
+      .length === 0;
+    if (isSelectedRouteOneWay) setSelectedDirection("outbound")
+    setIsOneWayRoute(isSelectedRouteOneWay)
     setRouteMarkers(
       routeStopRecords
         .filter((routeStop) => routeStop.referenceId === selectedRouteReferenceId && (selectedDirection === 'outbound' ? routeStop.direction === 'O' : routeStop.direction === 'I'))
@@ -533,27 +542,33 @@ function BusRouteMap() {
             ))
           )}
         </select>
-        <span className="route-status-panel__label">
-          {UI_COPY[selectedLanguage].direction}
-        </span>
-        <div className="route-status-panel__segment route-status-panel__segment--buttons grid-cols-1 sm:grid-cols-2" role="group" aria-label={UI_COPY[selectedLanguage].directionSelector}>
-          <button
-            type="button"
-            className={`route-status-panel__direction-button ${selectedDirection === 'outbound' ? 'route-status-panel__direction-button--active' : ''}`}
-            onClick={() => setSelectedDirection('outbound')}
-            disabled={isCircularRoute}
-          >
-            {getRouteDirectionLabel(selectedRouteId, 'outbound', selectedLanguage)}
-          </button>
-          <button
-            type="button"
-            className={`route-status-panel__direction-button ${selectedDirection === 'inbound' ? 'route-status-panel__direction-button--active' : ''}`}
-            onClick={() => setSelectedDirection('inbound')}
-            disabled={isCircularRoute}
-          >
-            {getRouteDirectionLabel(selectedRouteId, 'inbound', selectedLanguage)}
-          </button>
-        </div>
+        {
+          !isCircularRoute &&
+          <>
+            <span className="route-status-panel__label">
+              {UI_COPY[selectedLanguage].direction}
+            </span>
+            <div className="route-status-panel__segment route-status-panel__segment--buttons" role="group" aria-label={UI_COPY[selectedLanguage].directionSelector}>
+              <button
+                type="button"
+                className={`route-status-panel__direction-button ${selectedDirection === 'outbound' ? 'route-status-panel__direction-button--active' : ''}`}
+                onClick={() => setSelectedDirection('outbound')}
+              >
+                {getRouteDirectionLabel(selectedRouteId, 'outbound', selectedLanguage)}
+              </button>
+              {
+                !isOneWayRoute &&
+                <button
+                  type="button"
+                  className={`route-status-panel__direction-button ${selectedDirection === 'inbound' ? 'route-status-panel__direction-button--active' : ''}`}
+                  onClick={() => setSelectedDirection('inbound')}
+                >
+                  {getRouteDirectionLabel(selectedRouteId, 'inbound', selectedLanguage)}
+                </button>
+              }
+            </div>
+          </>
+        }
       </div>
       <MapContainer center={DEFAULT_MAP_CENTER} zoom={DEFAULT_MAP_ZOOM} className='map-canvas'>
         <TileLayer

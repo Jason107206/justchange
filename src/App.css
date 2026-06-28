@@ -139,7 +139,7 @@
 
 .route-status-panel__direction-button:disabled {
     opacity: 0.55;
-    cursor: wait;
+    cursor: not-allowed;
 }
 
 .route-status-panel__direction-button--active {
@@ -175,6 +175,7 @@
     max-height: 9rem;
     overflow: auto;
     display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
     gap: 0.35rem;
 }
 
