@@ -11,13 +11,4 @@ export default defineConfig({
     tailwindcss(),
     babel({ presets: [reactCompilerPreset()] })
   ],
-  server: {
-    proxy: {
-      '/api/mtr_bus_routes.csv': {
-        target: 'https://opendata.mtr.com.hk',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/data'),
-      },
-    },
-  },
 })

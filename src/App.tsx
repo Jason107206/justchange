@@ -2,9 +2,9 @@ import './App.css';
 import { useCallback, useEffect, useState } from 'react';
 import { CircleMarker, MapContainer, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import busStopsCsv from '../data/mtr_bus_stops.csv?raw';
+import routeDataCsv from '../data/mtr_bus_routes.csv?raw';
 
 const ETA_DATA_URL = "https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule";
-const ROUTE_DATA_URL = '/api/mtr_bus_routes.csv';
 const DEFAULT_ROUTE_ID = 'K73';
 const DEFAULT_LANGUAGE: 'en' | 'zh' = 'zh';
 const DEFAULT_DIRECTION: 'outbound' | 'inbound' = 'outbound';
@@ -380,9 +380,7 @@ function BusRouteMap() {
   const [selectedDirection, setSelectedDirection] = useState<'outbound' | 'inbound'>(DEFAULT_DIRECTION);
   const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'zh'>(DEFAULT_LANGUAGE);
   const [loading, setLoading] = useState(true);
-  const [routeLoading, setRouteLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [routeError, setRouteError] = useState<string | null>(null);
   const [busStops, setBusStops] = useState<BusStopRecord[]>([]);
 
   const fetchBusData = useCallback(async (routeName: string, direction: 'outbound' | 'inbound', language: 'en' | 'zh') => {
@@ -430,27 +428,7 @@ function BusRouteMap() {
   }, []);
 
   const fetchRouteData = useCallback(async () => {
-    setRouteLoading(true);
-    setRouteError(null);
-
-    return fetch(ROUTE_DATA_URL)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        return response.text();
-      })
-      .then((csvText) => {
-        setRouteData(parseRouteCsv(csvText));
-        setRouteError(null);
-      })
-      .catch((err: Error) => {
-        setRouteError(err.message);
-      })
-      .finally(() => {
-        setRouteLoading(false);
-      });
+    setRouteData(parseRouteCsv(routeDataCsv));
   }, []);
 
   useEffect(() => {
@@ -567,7 +545,7 @@ function BusRouteMap() {
             setSelectedRouteReferenceId(event.target.value);
             setSelectedRouteId(nextRoute?.routeId ?? event.target.value);
           }}
-          disabled={routeLoading || routeOptions.length === 0}
+          disabled={routeOptions.length === 0}
         >
           {routeOptions.length === 0 ? (
             <option value={selectedRouteReferenceId}>{UI_COPY[selectedLanguage].noRoutesLoaded}</option>
@@ -579,9 +557,6 @@ function BusRouteMap() {
             ))
           )}
         </select>
-
-        {routeLoading && <div>{UI_COPY[selectedLanguage].loadingRouteCsv}</div>}
-        {routeError && <div className="route-status-panel__error">{UI_COPY[selectedLanguage].routeCsvError} {routeError}</div>}
       </div>
       <MapContainer center={DEFAULT_MAP_CENTER} zoom={DEFAULT_MAP_ZOOM} className='map-canvas'>
         <TileLayer
