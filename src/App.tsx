@@ -331,7 +331,7 @@ function BusMarker({
   const copy = UI_COPY[language];
 
   return (
-    <CircleMarker center={[lat, long]} pathOptions={{ color: '#16a34a', fillColor: '#16a34a', fillOpacity: 0.9, weight: 2 }} radius={6}>
+    <CircleMarker center={[lat, long]} pathOptions={{ color: '#16a34a', fillColor: '#16a34a', fillOpacity: 0.9, weight: 2 }} radius={8}>
       <Tooltip direction="top" offset={[0, -6]} opacity={1} permanent={true} sticky>
         <div>
           <div>{copy.busId}: {id}</div>
@@ -345,16 +345,17 @@ function BusMarker({
 }
 
 function RouteStopMarker({
-  lat, long, name,
+  seqNo, lat, long, name,
 }: {
+  seqNo: number;
   lat: number;
   long: number;
   name: string;
 }) {
   return (
-    <CircleMarker center={[lat, long]} pathOptions={{ color: '#2563eb', fillColor: '#2563eb', fillOpacity: 0.9, weight: 2 }} radius={5}>
+    <CircleMarker center={[lat, long]} pathOptions={{ color: '#2563eb', fillColor: '#2563eb', fillOpacity: 0.9, weight: 2 }} radius={6}>
       <Tooltip direction="top" offset={[0, -6]} opacity={1} permanent={false} sticky>
-        <div>{name}</div>
+        <div>{seqNo}. {name}</div>
       </Tooltip>
     </CircleMarker>
   );
@@ -477,14 +478,15 @@ function BusRouteMap() {
   const selectedRoute = routeOptions.find((route) => route.referenceId === selectedRouteReferenceId);
   const isCircularRoute = selectedRoute?.isCircular ?? false;
   const selectedRouteName = selectedRoute?.routeId ?? selectedRouteId;
-  const selectedRouteDescription = selectedRoute ? `${selectedRoute.referenceId} - ${selectedLanguage === 'en' ? selectedRoute.routeNameEng : selectedRoute.routeNameChi}` : selectedRouteName;
   const mapFocus = routeMarkers[0];
   const mapFocusLatitude = mapFocus?.stationLatitude ?? DEFAULT_MAP_CENTER[0];
   const mapFocusLongitude = mapFocus?.stationLongitude ?? DEFAULT_MAP_CENTER[1];
 
   return (
     <div className="map-shell">
-      <div className="map-topbar">
+      <div className="map-topbar flex-col items-end sm:flex-row sm:items-center">
+        {error && <div className="map-status-panel map-status-panel--error">{UI_COPY[selectedLanguage].dataError} {error}</div>}
+        {!loading && !error && mapData.length === 0 && <div className="map-status-panel map-status-panel--error">{UI_COPY[selectedLanguage].emptyDepartureData}</div>}
         <button className="map-refetch-button" onClick={() => void fetchBusData(selectedRouteName, selectedDirection, selectedLanguage)} disabled={loading} type="button">
           {loading ? UI_COPY[selectedLanguage].refreshing : UI_COPY[selectedLanguage].refetchData}
         </button>
@@ -505,33 +507,7 @@ function BusRouteMap() {
           </button>
         </div>
       </div>
-      {loading && <div className="map-status-panel">{UI_COPY[selectedLanguage].loadingData}</div>}
-      {error && <div className="map-status-panel map-status-panel--error">{UI_COPY[selectedLanguage].dataError} {error}</div>}
-      {!loading && !error && mapData.length === 0 && <div className="map-status-panel">{UI_COPY[selectedLanguage].emptyDepartureData}</div>}
       <div className="route-status-panel">
-        <div className="route-status-panel__description">{selectedRouteDescription}</div>
-        <label className="route-status-panel__label" htmlFor="direction-select">
-          {UI_COPY[selectedLanguage].direction}
-        </label>
-        <div className="route-status-panel__segment route-status-panel__segment--buttons" role="group" aria-label={UI_COPY[selectedLanguage].directionSelector}>
-          <button
-            type="button"
-            className={`route-status-panel__direction-button ${selectedDirection === 'outbound' ? 'route-status-panel__direction-button--active' : ''}`}
-            onClick={() => setSelectedDirection('outbound')}
-            disabled={isCircularRoute}
-          >
-            {getRouteDirectionLabel(selectedRouteId, 'outbound', selectedLanguage)}
-          </button>
-          <button
-            type="button"
-            className={`route-status-panel__direction-button ${selectedDirection === 'inbound' ? 'route-status-panel__direction-button--active' : ''}`}
-            onClick={() => setSelectedDirection('inbound')}
-            disabled={isCircularRoute}
-          >
-            {getRouteDirectionLabel(selectedRouteId, 'inbound', selectedLanguage)}
-          </button>
-        </div>
-
         <label className="route-status-panel__label" htmlFor="route-select">
           {UI_COPY[selectedLanguage].route}
         </label>
@@ -557,6 +533,27 @@ function BusRouteMap() {
             ))
           )}
         </select>
+        <span className="route-status-panel__label">
+          {UI_COPY[selectedLanguage].direction}
+        </span>
+        <div className="route-status-panel__segment route-status-panel__segment--buttons grid-cols-1 sm:grid-cols-2" role="group" aria-label={UI_COPY[selectedLanguage].directionSelector}>
+          <button
+            type="button"
+            className={`route-status-panel__direction-button ${selectedDirection === 'outbound' ? 'route-status-panel__direction-button--active' : ''}`}
+            onClick={() => setSelectedDirection('outbound')}
+            disabled={isCircularRoute}
+          >
+            {getRouteDirectionLabel(selectedRouteId, 'outbound', selectedLanguage)}
+          </button>
+          <button
+            type="button"
+            className={`route-status-panel__direction-button ${selectedDirection === 'inbound' ? 'route-status-panel__direction-button--active' : ''}`}
+            onClick={() => setSelectedDirection('inbound')}
+            disabled={isCircularRoute}
+          >
+            {getRouteDirectionLabel(selectedRouteId, 'inbound', selectedLanguage)}
+          </button>
+        </div>
       </div>
       <MapContainer center={DEFAULT_MAP_CENTER} zoom={DEFAULT_MAP_ZOOM} className='map-canvas'>
         <TileLayer
@@ -567,6 +564,7 @@ function BusRouteMap() {
         {routeMarkers.map((routeMarker) => (
           <RouteStopMarker
             key={routeMarker.stationId}
+            seqNo={routeMarker.stationSeqNo}
             lat={routeMarker.stationLatitude}
             long={routeMarker.stationLongitude}
             name={selectedLanguage === 'en' ? routeMarker.stationNameEng : routeMarker.stationNameChi}
