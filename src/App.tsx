@@ -1,10 +1,11 @@
 import './App.css';
 import { useCallback, useEffect, useState } from 'react';
 import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet';
-import markerIconPng from "leaflet/dist/images/marker-icon.png";
+import markerIconPng from 'leaflet/dist/images/marker-icon.png';
 import { Icon } from 'leaflet';
 import busStopsCsv from '../data/mtr_bus_stops.csv?raw';
 import routeDataCsv from '../data/mtr_bus_routes.csv?raw';
+import myLocation from '../src/assets/myLocation.svg';
 
 const ETA_DATA_URL = "https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule";
 const DEFAULT_ROUTE_ID = 'K73';
@@ -19,7 +20,7 @@ const UI_COPY = {
     refetchData: 'Refetch data',
     refreshing: 'Refreshing...',
     loadingData: 'Loading data from server...',
-    emptyDepartureData: 'There are no departures at the moment... ૮(◞ ‸ ◟ )ა',
+    emptyDepartureData: 'No departures at the moment... ૮(◞ ‸ ◟ )ა',
     loadingRouteCsv: 'Loading route CSV...',
     routeCsvError: 'Error fetching route CSV:',
     dataError: 'Error fetching data:',
@@ -334,7 +335,7 @@ function BusMarker({
 
   return (
     <CircleMarker center={[lat, long]} pathOptions={{ color: '#16a34a', fillColor: '#16a34a', fillOpacity: 0.9, weight: 2 }} radius={8}>
-      <Tooltip direction="top" offset={[0, -6]} opacity={1} permanent={true} sticky>
+      <Tooltip direction="top" offset={[0, -6]} opacity={1} permanent={false} sticky>
         <div>
           <div>{copy.busId}: {id}</div>
           {tooltipLines.map((stop) => (
@@ -436,6 +437,31 @@ function BusRouteMap() {
     setRouteData(parseRouteCsv(routeDataCsv));
   }, []);
 
+  /*const watchGpsLocation = useCallback(async () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setMapFocusLatitude(latitude);
+        setMapFocusLongitude(longitude);
+      },
+      (err) => {
+        setError(`${err.message}`);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);*/
+
   useEffect(() => {
     void fetchBusData(selectedRouteId, selectedDirection, selectedLanguage);
   }, [fetchBusData, selectedRouteId, selectedDirection, selectedLanguage]);
@@ -493,6 +519,11 @@ function BusRouteMap() {
 
   return (
     <div className="map-shell">
+      <div className="map-gps">
+        <button className="map-gps-button" onClick={() => /*void watchGpsLocation()*/ { }}>
+          <img src={myLocation} alt='My Location' />
+        </button>
+      </div>
       <div className="map-topbar flex-col items-end sm:flex-row sm:items-center">
         {error && <div className="map-status-panel map-status-panel--error">{UI_COPY[selectedLanguage].dataError} {error}</div>}
         {!loading && !error && mapData.length === 0 && <div className="map-status-panel map-status-panel--error">{UI_COPY[selectedLanguage].emptyDepartureData}</div>}
