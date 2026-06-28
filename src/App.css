@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+.map-shell {
+    position: relative;
+    height: 100vh;
+}
+
+.map-topbar {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.map-canvas {
+    height: 100%;
+    width: 100%;
+}
+
+.map-refetch-button {
+    border: 0;
+    border-radius: 9999px;
+    background: rgba(17, 24, 39, 0.92);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    font: inherit;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.map-refetch-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.map-refetch-button:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.map-status-panel {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    z-index: 10000;
+    max-width: min(28rem, calc(100vw - 2rem));
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.92);
+    color: #111827;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(10px);
+}
+
+.map-status-panel--error {
+    background: rgba(254, 226, 226, 0.95);
+    color: #991b1b;
+}
+
+.route-status-panel {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1000;
+    width: min(26rem, calc(100vw - 2rem));
+    border-radius: 1rem;
+    background: rgba(15, 23, 42, 0.9);
+    color: #e5e7eb;
+    padding: 0.9rem 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(10px);
+}
+
+.route-status-panel__description {
+    margin-bottom: 0.75rem;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.route-status-panel__segment {
+    display: inline-flex;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+    padding: 0.25rem;
+    border-radius: 9999px;
+    background: rgba(30, 41, 59, 0.9);
+}
+
+.route-status-panel__segment--compact {
+    margin-bottom: 0;
+}
+
+.route-status-panel__segment--buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+}
+
+.route-status-panel__lang-button {
+    border: 0;
+    border-radius: 9999px;
+    background: transparent;
+    color: #cbd5e1;
+    padding: 0.45rem 0.8rem;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.route-status-panel__lang-button--active {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.route-status-panel__label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #93c5fd;
+}
+
+.route-status-panel__direction-button {
+    width: 100%;
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: 0.7rem;
+    background: rgba(30, 41, 59, 0.9);
+    color: #eff6ff;
+    padding: 0.7rem 0.9rem;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1.1;
+}
+
+.route-status-panel__direction-button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.route-status-panel__direction-button--active {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.route-status-panel__select {
+    width: 100%;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 0.75rem;
+    background: rgba(15, 23, 42, 0.98);
+    color: #f8fafc;
+    min-height: 2.75rem;
+    padding: 0.7rem 0.8rem;
+    font: inherit;
+    margin-bottom: 0.75rem;
+}
+
+.route-status-panel__title {
+    font-weight: 700;
+}
+
+.route-status-panel__count {
+    margin-top: 0.25rem;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+}
+
+.route-status-panel__list {
+    margin: 0.75rem 0 0;
+    padding-left: 1.1rem;
+    max-height: 9rem;
+    overflow: auto;
+    display: grid;
+    gap: 0.35rem;
+}
+
+.route-status-panel__error {
+    color: #fecaca;
+}
